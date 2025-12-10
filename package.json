@@ -7,6 +7,13 @@
         "url": "https://creatorem.com",
         "name": "Creatorem"
     },
+    "license": "MIT",
+    "publishConfig": {
+        "access": "public"
+    },
+    "files": [
+        "dist"
+    ],
     "scripts": {
         "build": "tsc --noEmit false --outDir dist --declaration",
         "clean": "git clean -xdf .turbo node_modules",
@@ -18,10 +25,22 @@
         "test:coverage": "jest --coverage"
     },
     "exports": {
-        "./": "./src/core.ts",
-        "./server": "./src/create-rpc-api.ts",
-        "./client": "./src/create-rpc-client.ts",
-        "./query-client": "./src/create-rpc-query-client.ts"
+        "./": {
+            "require": "./dist/core.js",
+            "types": "./dist/core.d.ts"
+        },
+        "./server": {
+            "require": "./dist/create-rpc-api.js",
+            "types": "./dist/create-rpc-api.d.ts"
+        },
+        "./client": {
+            "require": "./dist/create-rpc-client.js",
+            "types": "./dist/create-rpc-client.d.ts"
+        },
+        "./query-client": {
+            "require": "./dist/create-rpc-query-client.js",
+            "types": "./dist/create-rpc-query-client.d.ts"
+        }
     },
     "devDependencies": {
         "typescript": "~5.9.2"
