@@ -1,0 +1,38 @@
+{
+    "name": "@creatorem/next-trpc",
+    "private": false,
+    "version": "1.0.0",
+    "homepage": "https://creatorem.com",
+    "author": {
+        "url": "https://creatorem.com",
+        "name": "Creatorem"
+    },
+    "scripts": {
+        "clean": "git clean -xdf .turbo node_modules",
+        "format": "prettier --check \"**/*.{ts,tsx}\"",
+        "lint": "eslint .",
+        "typecheck": "tsc --noEmit",
+        "test": "jest",
+        "test:watch": "jest --watch",
+        "test:coverage": "jest --coverage"
+    },
+    "exports": {
+        "./": "./src/core.ts",
+        "./server": "./src/create-rpc-api.ts",
+        "./client": "./src/create-rpc-client.ts",
+        "./query-client": "./src/create-rpc-query-client.ts"
+    },
+    "peerDependencies": {
+        "@tanstack/react-query": "5.90.12",
+        "next": "16.0.7",
+        "zod": "^3.25.76"
+    },
+    "packageManager": "pnpm@9.12.0",
+    "typesVersions": {
+        "*": {
+            "*": [
+                "src/*"
+            ]
+        }
+    }
+}
