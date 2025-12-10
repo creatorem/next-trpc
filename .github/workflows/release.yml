@@ -30,12 +30,12 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build package
-        run: cd core && pnpm build
+        run: pnpm build
 
       - name: Check if version changed
         id: version-check
         run: |
-          CURRENT_VERSION=$(cd core && node -p "require('./package.json').version")
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
           echo "current_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
           
           # Check if tag already exists
@@ -58,6 +58,6 @@ jobs:
 
       - name: Publish to npm
         if: steps.version-check.outputs.version_changed == 'true'
-        run: cd core && pnpm publish --no-git-checks --access public
+        run: pnpm publish --no-git-checks --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
