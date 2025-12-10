@@ -8,6 +8,7 @@
         "name": "Creatorem"
     },
     "scripts": {
+        "build": "tsc --noEmit false --outDir dist --declaration",
         "clean": "git clean -xdf .turbo node_modules",
         "format": "prettier --check \"**/*.{ts,tsx}\"",
         "lint": "eslint .",
@@ -21,6 +22,9 @@
         "./server": "./src/create-rpc-api.ts",
         "./client": "./src/create-rpc-client.ts",
         "./query-client": "./src/create-rpc-query-client.ts"
+    },
+    "devDependencies": {
+        "typescript": "~5.9.2"
     },
     "peerDependencies": {
         "@tanstack/react-query": "5.90.12",
