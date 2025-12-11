@@ -1,4 +1,4 @@
-import { CtxRouter, endpoint } from "../../src/core";
+import { CtxRouter } from "../../src/core";
 import z from "zod";
 
 export const createContext = async () => {
@@ -11,7 +11,7 @@ export const createContext = async () => {
 const ctx = new CtxRouter<Awaited<ReturnType<typeof createContext>>>();
 
 export const appRouter = ctx.router({
-  getUser: endpoint.action(async ({ hello, howAreYou, request }) => {
+  getUser: ctx.endpoint.action(async ({ hello, howAreYou, request }) => {
     console.log({
       myCustomContext: {
         hello,
@@ -31,7 +31,7 @@ export const appRouter = ctx.router({
       }, 1000);
     });
   }),
-  greeting: endpoint
+  greeting: ctx.endpoint
   .input(
       z.object({
           name: z.string(),
@@ -42,7 +42,7 @@ export const appRouter = ctx.router({
         console.log({ howAreYou });
         return `Hi my name is ${name}, and I am ${age} years old.`;
     }),
-    test: endpoint.action(async ({ hello, howAreYou, request }) => {
+    test: ctx.endpoint.action(async ({ hello, howAreYou, request }) => {
   
       return new Promise((resolve) => {
         setTimeout(() => {

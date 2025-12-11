@@ -1,7 +1,7 @@
 "use server";
 
 import { serverTrpc } from "~/trpc/server-client";
-import { ClientComp } from "./client-comp";
+import { ClientComp } from "../components/client-comp";
 
 export default async function Home() {
   const user = await serverTrpc.getUser.fetch();

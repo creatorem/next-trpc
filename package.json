@@ -1,7 +1,6 @@
 {
     "name": "@creatorem/next-trpc",
-    "type": "module",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "repository": {
         "type": "git",
         "url": "git+https://github.com/creatorem/next-trpc"
@@ -24,7 +23,7 @@
         "dist"
     ],
     "scripts": {
-        "build": "tsc --noEmit false --outDir dist --declaration",
+        "build": "tsc --noEmit false --outDir dist --declaration --module commonjs --target ES2017",
         "clean": "git clean -xdf .turbo dist node_modules",
         "format": "prettier --check \"**/*.{ts,tsx}\"",
         "lint": "eslint .",
@@ -35,18 +34,22 @@
     },
     "exports": {
         ".": {
+            "import": "./dist/core.js",
             "require": "./dist/core.js",
             "types": "./dist/core.d.ts"
         },
         "./server": {
+            "import": "./dist/create-trpc-api.js",
             "require": "./dist/create-trpc-api.js",
             "types": "./dist/create-trpc-api.d.ts"
         },
         "./client": {
+            "import": "./dist/create-trpc-client.js",
             "require": "./dist/create-trpc-client.js",
             "types": "./dist/create-trpc-client.d.ts"
         },
         "./query-client": {
+            "import": "./dist/create-trpc-query-client.js",
             "require": "./dist/create-trpc-query-client.js",
             "types": "./dist/create-trpc-query-client.d.ts"
         }
@@ -64,7 +67,7 @@
     "typesVersions": {
         "*": {
             "*": [
-                "src/*"
+                "dist/*"
             ]
         }
     }

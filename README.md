@@ -173,10 +173,10 @@ export const createContext = async () => {
 const ctx = new CtxRouter<Awaited<ReturnType<typeof createContext>>>();
 
 export const appRouter = ctx.router({
-  getUser: endpoint.action(async ({ db }) => {
+  getUser: ctx.endpoint.action(async ({ db }) => {
     return await db.user.get();
   }),
-  greeting: endpoint
+  greeting: ctx.endpoint
     .input(
       // you can add zod typechecking to your entry params
       z.object({
@@ -191,6 +191,9 @@ export const appRouter = ctx.router({
 
 export type AppRouter = typeof appRouter;
 ```
+
+> [!NOTE]
+> Param types are serialized during the http request to the api. You need to use `z.coerce` for non-string types.
 
 Next pass your context to the nextjs api endpoint.
 
