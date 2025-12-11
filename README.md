@@ -5,7 +5,7 @@ A simple typed rpc interface to easily type api endpoints in an app router nextj
 ## Installation
 
 ```sh
-npm install @creatorem/next-trpc
+npm install @creatorem/next-trpc zod
 ```
 
 <br/>
