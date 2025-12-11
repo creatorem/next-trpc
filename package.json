@@ -25,7 +25,7 @@
     ],
     "scripts": {
         "build": "tsc --noEmit false --outDir dist --declaration",
-        "clean": "git clean -xdf .turbo node_modules",
+        "clean": "git clean -xdf .turbo dist node_modules",
         "format": "prettier --check \"**/*.{ts,tsx}\"",
         "lint": "eslint .",
         "typecheck": "tsc --noEmit",
@@ -52,6 +52,7 @@
         }
     },
     "devDependencies": {
+        "turbo": "^2.6.3",
         "typescript": "~5.9.2"
     },
     "peerDependencies": {

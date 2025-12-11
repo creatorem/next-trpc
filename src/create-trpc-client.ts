@@ -1,17 +1,18 @@
 import { Router, type Endpoint, type router } from "./core";
 import { kebabize } from "./utils";
+import z from "zod";
+
+export type EndpointClient<Input, Output> = Input extends undefined
+  ? { fetch: () => Promise<Output> }
+  : {
+      fetch: (
+        input: Input extends import("zod").Schema ? z.infer<Input> : Input
+      ) => Promise<Output>;
+    };
 
 type TrpcClient<R extends Router<any>> = {
   [K in keyof R]: R[K] extends Endpoint<infer Output, infer Input, any>
-    ? Input extends undefined
-      ? { fetch: () => Promise<Output> }
-      : {
-          fetch: (
-            input: Input extends import("zod").Schema
-              ? import("zod").infer<Input>
-              : Input
-          ) => Promise<Output>;
-        }
+    ? EndpointClient<Input, Output>
     : never;
 };
 
@@ -37,7 +38,7 @@ export const getTrpcFetch =
     }
 
     const headerObject =
-      typeof headers === "function" ? await headers() : headers;
+      typeof headers === "function" ? await headers() : headers || {};
     const response = await fetch(requestUrl, {
       method: "GET",
       headers: {
@@ -57,7 +58,7 @@ export const getTrpcFetch =
 
 export interface createTrpcClientOptions {
   url: string;
-  headers: HeadersInit | (() => Promise<HeadersInit>);
+  headers?: HeadersInit | (() => Promise<HeadersInit>);
 }
 
 export const createTrpcClient = <

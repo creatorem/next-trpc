@@ -4,7 +4,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { type router as routerFn, type Endpoint, Router } from "./core";
 import { camelize } from "./utils";
 
-const parseInput = (request: NextRequest, endpoint: Endpoint<any, any>) => {
+const parseInput = (request: NextRequest, endpoint: Endpoint<any, any, any>) => {
   if (!endpoint.input) return undefined;
 
   const searchParams = request.nextUrl.searchParams;
@@ -68,10 +68,10 @@ export const createTrpcAPI = <Ctx>({
 
     try {
       const input = parseInput(request, endpoint);
-      const context = ctx ? await ctx(request) : {};
+      const context = (ctx ? (await ctx(request)) : {}) as Ctx;
       const result = endpoint.input
         ? await endpoint.action(input, { ...context, request })
-        : await (endpoint as Endpoint<any, undefined>).action({
+        : await (endpoint as Endpoint<any, undefined, Ctx>).action({
             ...context,
             request,
           });
