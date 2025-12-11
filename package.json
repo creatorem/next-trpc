@@ -1,6 +1,7 @@
 {
     "name": "@creatorem/next-trpc",
     "version": "1.0.5",
+    "type": "module",
     "repository": {
         "type": "git",
         "url": "git+https://github.com/creatorem/next-trpc"
