@@ -19,11 +19,10 @@ const parseInput = (request: NextRequest, endpoint: Endpoint<any, any>) => {
   return endpoint.input.parse(paramsObj);
 };
 
-export const createRpcAPI = <Ctx>({
+export const createTrpcAPI = <Ctx>({
   router,
   ctx,
 }: {
-  // router: ReturnType<typeof routerFn>;
   router: ReturnType<typeof routerFn<any, Router<any>>>;
   ctx?: (request: NextRequest) => Promise<Ctx>;
 }) => {
@@ -31,29 +30,29 @@ export const createRpcAPI = <Ctx>({
     request: NextRequest,
     context: { params: Promise<unknown> }
   ): Promise<NextResponse<unknown>> {
-    const params = (await context.params) as { rpc: string };
+    const params = (await context.params) as { trpc: string };
 
-    if (!("rpc" in params)) {
+    if (!("trpc" in params)) {
       return NextResponse.json(
         {
           data: null,
-          error: "You must call createAPI in a [rpc]/route.ts file.",
+          error: "You must call createAPI in a [trpc]/route.ts file.",
         },
         { status: 400 }
       );
     }
-    if (!params.rpc) {
+    if (!params.trpc) {
       return NextResponse.json(
         {
           data: null,
           error:
-            "You must pass a params in your [rpc]/you-must-put-a-param-here call",
+            "You must pass a params in your [trpc]/you-must-put-a-param-here call",
         },
         { status: 400 }
       );
     }
 
-    const endpointAttribute = camelize(params.rpc);
+    const endpointAttribute = camelize(params.trpc);
 
     if (!(endpointAttribute in router) || !router[endpointAttribute]) {
       return NextResponse.json(

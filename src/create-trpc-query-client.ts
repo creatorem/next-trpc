@@ -1,10 +1,10 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { CreateRpcClientOptions, getRpcFetch } from "./create-rpc-client";
+import { createTrpcClientOptions, getTrpcFetch } from "./create-trpc-client";
 import { Router, type Endpoint, type router } from "./core";
 
-type RpcClient<R extends Router<any>> = {
+type TrpcClient<R extends Router<any>> = {
   [K in keyof R]: R[K] extends Endpoint<infer Output, infer Input, any>
     ? Input extends undefined
       ? {
@@ -36,16 +36,16 @@ type RpcClient<R extends Router<any>> = {
     : never;
 };
 
-export const createRpcQueryClient = <
+export const createTrpcQueryClient = <
   R extends ReturnType<typeof router<any, Router<any>>>
 >(
-  opts: CreateRpcClientOptions
-): RpcClient<R> => {
-  return new Proxy({} as RpcClient<R>, {
+  opts: createTrpcClientOptions
+): TrpcClient<R> => {
+  return new Proxy({} as TrpcClient<R>, {
     get(target, prop) {
       if (typeof prop === "string") {
         return {
-          fetch: getRpcFetch({
+          fetch: getTrpcFetch({
             endpointSlug: prop,
             ...opts,
           }),
@@ -59,7 +59,7 @@ export const createRpcQueryClient = <
             return useQuery({
               ...queryOptions,
               queryKey: [endpointName],
-              queryFn: getRpcFetch({
+              queryFn: getTrpcFetch({
                 endpointSlug: prop,
                 ...opts,
               }),

@@ -1,7 +1,7 @@
 import { Router, type Endpoint, type router } from "./core";
 import { kebabize } from "./utils";
 
-type RpcClient<R extends Router<any>> = {
+type TrpcClient<R extends Router<any>> = {
   [K in keyof R]: R[K] extends Endpoint<infer Output, infer Input, any>
     ? Input extends undefined
       ? { fetch: () => Promise<Output> }
@@ -15,14 +15,14 @@ type RpcClient<R extends Router<any>> = {
     : never;
 };
 
-export const getRpcFetch =
+export const getTrpcFetch =
   ({
     endpointSlug,
     url,
     headers,
   }: {
     endpointSlug: string;
-  } & CreateRpcClientOptions) =>
+  } & createTrpcClientOptions) =>
   async (input?: any) => {
     const endpointName = kebabize(endpointSlug);
 
@@ -55,22 +55,21 @@ export const getRpcFetch =
     return result.data;
   };
 
-export interface CreateRpcClientOptions {
+export interface createTrpcClientOptions {
   url: string;
   headers: HeadersInit | (() => Promise<HeadersInit>);
 }
 
-// export const createRpcClient = <R extends ReturnType<typeof router>>({
-export const createRpcClient = <
+export const createTrpcClient = <
   R extends ReturnType<typeof router<any, Router<any>>>
 >(
-  opts: CreateRpcClientOptions
-): RpcClient<R> => {
-  return new Proxy({} as RpcClient<R>, {
+  opts: createTrpcClientOptions
+): TrpcClient<R> => {
+  return new Proxy({} as TrpcClient<R>, {
     get(target, prop) {
       if (typeof prop === "string") {
         return {
-          fetch: getRpcFetch({
+          fetch: getTrpcFetch({
             endpointSlug: prop,
             ...opts,
           }),

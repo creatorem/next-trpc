@@ -1,12 +1,22 @@
 {
     "name": "@creatorem/next-trpc",
-    "private": false,
-    "version": "1.0.1",
+    "private": true,
+    "type": "module",
+    "version": "1.0.2",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/creatorem/next-trpc"
+    },
     "homepage": "https://creatorem.com",
     "author": {
         "url": "https://creatorem.com",
         "name": "Creatorem"
     },
+    "keywords": [
+        "nextjs",
+        "trpc",
+        "typescript"
+    ],
     "license": "MIT",
     "publishConfig": {
         "access": "public"
@@ -25,21 +35,21 @@
         "test:coverage": "jest --coverage"
     },
     "exports": {
-        "./": {
+        ".": {
             "require": "./dist/core.js",
             "types": "./dist/core.d.ts"
         },
         "./server": {
-            "require": "./dist/create-rpc-api.js",
-            "types": "./dist/create-rpc-api.d.ts"
+            "require": "./dist/create-trpc-api.js",
+            "types": "./dist/create-trpc-api.d.ts"
         },
         "./client": {
-            "require": "./dist/create-rpc-client.js",
-            "types": "./dist/create-rpc-client.d.ts"
+            "require": "./dist/create-trpc-client.js",
+            "types": "./dist/create-trpc-client.d.ts"
         },
         "./query-client": {
-            "require": "./dist/create-rpc-query-client.js",
-            "types": "./dist/create-rpc-query-client.d.ts"
+            "require": "./dist/create-trpc-query-client.js",
+            "types": "./dist/create-trpc-query-client.d.ts"
         }
     },
     "devDependencies": {

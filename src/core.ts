@@ -14,7 +14,7 @@ export type Endpoint<
         } & Ctx
       ) => Output
     : (
-        input: Input extends Schema ? import("zod").infer<Input> : Input,
+        input: Input extends Schema ? z.infer<Input> : Input,
         context: {
           request: NextRequest;
         } & Ctx
