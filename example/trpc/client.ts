@@ -5,6 +5,6 @@ import { type AppRouter } from "./router";
 
 const url = "http://localhost:3000/api/trpc";
 
-export const clientTrpc = createTrpcQueryClient<AppRouter>({
+export const clientTrpc: ReturnType<typeof createTrpcQueryClient<AppRouter>> = createTrpcQueryClient<AppRouter>({
   url,
 });
