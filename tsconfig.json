@@ -18,5 +18,13 @@
     "incremental": true,
     "noUncheckedIndexedAccess": true
   },
-  "exclude": ["node_modules", "build", "dist", ".next", "example"]
+  "exclude": [
+    "node_modules",
+    "build",
+    "dist",
+    ".next",
+    "example",
+    "coverage",
+    "src/__tests__"
+  ]
 }
