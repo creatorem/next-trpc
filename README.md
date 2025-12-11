@@ -155,6 +155,9 @@ export const MyClientComponent: React.FC<React.PropsWithChildren> = (props) => {
 };
 ```
 
+> [!WARNING]
+> Do not forget to wrap your app with `<QueryClientProvider>`. See [installation instructions](https://tanstack.com/query/latest/docs/framework/react/installation) for more details.
+
 ## Use a router context
 
 You can use a context object to pass data to all your endpoint callbacks.
