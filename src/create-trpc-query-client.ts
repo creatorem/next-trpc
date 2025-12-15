@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import type { useQuery as useQueryType } from "@tanstack/react-query";
 import {
   type EndpointClient,
   createTrpcClientOptions,
@@ -13,11 +13,11 @@ type TrpcClientWithQuery<R extends Router<any>> = {
     ? EndpointClient<Input, Output> & {
         useQuery: (
           queryOptions?: Omit<
-            Parameters<typeof useQuery>[0],
+            Parameters<typeof useQueryType>[0],
             "queryKey" | "queryFn"
           >
         ) => ReturnType<
-          typeof useQuery<Promise<Output>, Error, Promise<Output>, string[]>
+          typeof useQueryType<Promise<Output>, Error, Promise<Output>, string[]>
         >;
       }
     : never;
@@ -26,7 +26,7 @@ type TrpcClientWithQuery<R extends Router<any>> = {
 export const createTrpcQueryClient = <
   R extends ReturnType<typeof router<any, Router<any>>>
 >(
-  opts: createTrpcClientOptions
+  opts: createTrpcClientOptions & {useQuery: typeof useQueryType}
 ): TrpcClientWithQuery<R> => {
   return new Proxy({} as TrpcClientWithQuery<R>, {
     get(target, prop) {
@@ -38,12 +38,12 @@ export const createTrpcQueryClient = <
           }),
           useQuery: (
             queryOptions?: Omit<
-              Parameters<typeof useQuery>[0],
+              Parameters<typeof useQueryType>[0],
               "queryKey" | "queryFn"
             >
           ) => {
             const endpointName = prop.replace(/([A-Z])/g, "-$1").toLowerCase();
-            return useQuery({
+            return opts.useQuery({
               ...queryOptions,
               queryKey: [endpointName],
               queryFn: getTrpcFetch({
