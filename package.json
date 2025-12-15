@@ -1,6 +1,6 @@
 {
     "name": "@creatorem/next-trpc",
-    "version": "1.0.7",
+    "version": "1.0.8",
     "repository": {
         "type": "git",
         "url": "git+https://github.com/creatorem/next-trpc"
@@ -23,7 +23,7 @@
         "dist"
     ],
     "scripts": {
-        "build": "tsc --noEmit false --outDir dist --declaration --module commonjs --target ES2017",
+        "build": "tsc src/*.ts --outDir dist --declaration --module commonjs --target ES2017 --skipLibCheck",
         "clean": "git clean -xdf .turbo dist node_modules",
         "format": "prettier --check \"**/*.{ts,tsx}\"",
         "lint": "eslint .",
