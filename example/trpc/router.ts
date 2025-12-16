@@ -10,6 +10,12 @@ export const createContext = async () => {
 
 const ctx = new CtxRouter<Awaited<ReturnType<typeof createContext>>>();
 
+interface MockUser {
+  id:string,
+  name:string,
+  email:string,
+  avatar:string
+}
 export const appRouter = ctx.router({
   getUser: ctx.endpoint.action(async ({ hello, howAreYou, request }) => {
     console.log({
@@ -20,7 +26,7 @@ export const appRouter = ctx.router({
       nextjsRequest: request,
     });
 
-    return new Promise((resolve) => {
+    return new Promise<MockUser>((resolve) => {
       setTimeout(() => {
         resolve({
           id: "1",
