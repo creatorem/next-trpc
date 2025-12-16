@@ -17,7 +17,7 @@ type TrpcClientWithQuery<R extends Router<any>> = {
             "queryKey" | "queryFn"
           >
         ) => ReturnType<
-          typeof useQueryType<Output, Error, Output, string[]>
+          typeof useQueryType<Awaited<Output>, Error, Awaited<Output>, string[]>
         >;
       }
     : never;

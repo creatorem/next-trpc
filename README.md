@@ -124,12 +124,14 @@ import "client-only";
 
 import { envs } from "~/envs";
 import { createTrpcQueryClient } from "@creatorem/next-trpc/query-client";
+import { useQuery } from "@tanstack/react-query";
 import { type AppRouter } from "./router";
 
 const url = envs().NEXT_PUBLIC_YOUR_APP_URL + "/api/trpc";
 
 export const clientTrpc = createTrpcQueryClient<AppRouter>({
   url,
+  useQuery,
   headers: async () => {
     // add custom headers like Authorization to make it works with auth logic
     return {

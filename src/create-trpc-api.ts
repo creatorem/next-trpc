@@ -41,6 +41,7 @@ export const createTrpcAPI = <Ctx>({
         { status: 400 }
       );
     }
+    
     if (!params.trpc) {
       return NextResponse.json(
         {
