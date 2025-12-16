@@ -16,6 +16,15 @@ interface MockUser {
   email:string,
   avatar:string
 }
+
+interface MockOrganization {
+  id: string,
+  name: string,
+  slug: string,
+  description: string,
+  memberCount: number,
+  createdAt: string
+}
 export const appRouter = ctx.router({
   getUser: ctx.endpoint.action(async ({ hello, howAreYou, request }) => {
     console.log({
@@ -61,6 +70,35 @@ export const appRouter = ctx.router({
         }, 1000);
       });
     }),
+    getOrganization: ctx.endpoint
+      .input(
+        z.object({
+          orgSlug: z.string(),
+        })
+      )
+      .action(async ({ orgSlug }, { hello, howAreYou, request }) => {
+        console.log({
+          myCustomContext: {
+            hello,
+            howAreYou,
+          },
+          nextjsRequest: request,
+          orgSlug,
+        });
+
+        return new Promise<MockOrganization>((resolve) => {
+          setTimeout(() => {
+            resolve({
+              id: "org-123",
+              name: `Organization ${orgSlug}`,
+              slug: orgSlug,
+              description: `This is a mock organization for ${orgSlug}`,
+              memberCount: 25,
+              createdAt: "2023-01-01T00:00:00.000Z",
+            });
+          }, 1000);
+        });
+      }),
 });
 
 export type AppRouter = typeof appRouter;
