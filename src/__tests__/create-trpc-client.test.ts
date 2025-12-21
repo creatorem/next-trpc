@@ -206,7 +206,7 @@ describe('create-trpc-client', () => {
       await fetchFn(complexInput);
 
       expect(mockFetch).toHaveBeenCalledWith(
-        'http://localhost:3000/api/trpc/create-user?name=John+Doe&age=30&active=true&metadata=%5Bobject+Object%5D',
+        'http://localhost:3000/api/trpc/create-user?name=John+Doe&age=30&active=true&metadata=%7B%22key%22%3A%22value%22%7D',
         expect.any(Object)
       );
     });

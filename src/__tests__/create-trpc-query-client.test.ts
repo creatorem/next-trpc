@@ -25,7 +25,8 @@ describe('create-trpc-query-client', () => {
   describe('createTrpcQueryClient', () => {
     it('creates client with proxy that returns fetch and useQuery functions', () => {
       const client = createTrpcQueryClient({
-        url: 'http://localhost:3000/api/trpc'
+        url: 'http://localhost:3000/api/trpc',
+        useQuery: mockUseQuery
       });
 
       expect(typeof (client as any).getUser.fetch).toBe('function');
@@ -36,7 +37,8 @@ describe('create-trpc-query-client', () => {
 
     it('proxy returns undefined for non-string properties', () => {
       const client = createTrpcQueryClient({
-        url: 'http://localhost:3000/api/trpc'
+        url: 'http://localhost:3000/api/trpc',
+        useQuery: mockUseQuery
       });
 
       expect((client as any)[Symbol.iterator]).toBeUndefined();
@@ -53,7 +55,8 @@ describe('create-trpc-query-client', () => {
       mockFetch.mockResolvedValue(mockResponse as any);
 
       const client = createTrpcQueryClient({
-        url: 'http://localhost:3000/api/trpc'
+        url: 'http://localhost:3000/api/trpc',
+        useQuery: mockUseQuery
       });
 
       const result = await (client as any).getUser.fetch({ id: '123' });
@@ -72,7 +75,8 @@ describe('create-trpc-query-client', () => {
 
     it('useQuery function calls useQuery with correct parameters', () => {
       const client = createTrpcQueryClient({
-        url: 'http://localhost:3000/api/trpc'
+        url: 'http://localhost:3000/api/trpc',
+        useQuery: mockUseQuery
       });
 
       const mockQueryResult = {
@@ -100,7 +104,8 @@ describe('create-trpc-query-client', () => {
 
     it('useQuery converts camelCase to kebab-case for queryKey', () => {
       const client = createTrpcQueryClient({
-        url: 'http://localhost:3000/api/trpc'
+        url: 'http://localhost:3000/api/trpc',
+        useQuery: mockUseQuery
       });
 
       mockUseQuery.mockReturnValue({});
@@ -115,7 +120,8 @@ describe('create-trpc-query-client', () => {
 
     it('useQuery handles endpoint names with consecutive uppercase letters', () => {
       const client = createTrpcQueryClient({
-        url: 'http://localhost:3000/api/trpc'
+        url: 'http://localhost:3000/api/trpc',
+        useQuery: mockUseQuery
       });
 
       mockUseQuery.mockReturnValue({});
@@ -130,7 +136,8 @@ describe('create-trpc-query-client', () => {
 
     it('useQuery works without additional options', () => {
       const client = createTrpcQueryClient({
-        url: 'http://localhost:3000/api/trpc'
+        url: 'http://localhost:3000/api/trpc',
+        useQuery: mockUseQuery
       });
 
       mockUseQuery.mockReturnValue({});
@@ -152,6 +159,7 @@ describe('create-trpc-query-client', () => {
 
       const client = createTrpcQueryClient({
         url: 'http://localhost:3000/api/trpc',
+        useQuery: mockUseQuery,
         headers: {
           'Authorization': 'Bearer token123'
         }
@@ -184,6 +192,7 @@ describe('create-trpc-query-client', () => {
 
       const client = createTrpcQueryClient({
         url: 'http://localhost:3000/api/trpc',
+        useQuery: mockUseQuery,
         headers: headersFn
       });
 
@@ -212,7 +221,8 @@ describe('create-trpc-query-client', () => {
       });
 
       const client = createTrpcQueryClient<typeof testRouter>({
-        url: 'http://localhost:3000/api/trpc'
+        url: 'http://localhost:3000/api/trpc',
+        useQuery: mockUseQuery
       });
 
       expect((client as any).getUser.fetch).toBeDefined();
@@ -233,7 +243,8 @@ describe('create-trpc-query-client', () => {
       mockFetch.mockResolvedValue(mockResponse as any);
 
       const client = createTrpcQueryClient({
-        url: 'http://localhost:3000/api/trpc'
+        url: 'http://localhost:3000/api/trpc',
+        useQuery: mockUseQuery
       });
 
       let capturedQueryFn: any;
@@ -259,7 +270,8 @@ describe('create-trpc-query-client', () => {
 
     it('preserves all useQuery options while adding queryKey and queryFn', () => {
       const client = createTrpcQueryClient({
-        url: 'http://localhost:3000/api/trpc'
+        url: 'http://localhost:3000/api/trpc',
+        useQuery: mockUseQuery
       });
 
       mockUseQuery.mockReturnValue({});
@@ -291,7 +303,8 @@ describe('create-trpc-query-client', () => {
       mockFetch.mockResolvedValue(mockResponse as any);
 
       const client = createTrpcQueryClient({
-        url: 'http://localhost:3000/api/trpc'
+        url: 'http://localhost:3000/api/trpc',
+        useQuery: mockUseQuery
       });
 
       let capturedQueryFn: any;

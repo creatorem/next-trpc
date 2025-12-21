@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { clientTrpc } from "~/trpc/client";
 
 export const ClientComp: React.FC = () => {
@@ -14,6 +14,28 @@ export const ClientComp: React.FC = () => {
     },
   });
   console.log({ clientOrganization: organization });
+
+  useEffect(() => {
+    const asyncFn = async () => {
+      await clientTrpc.analyticsFetcher.fetch({
+        contentTypes: ["booking"],
+        organizationId: "qlmskjdqslmdf",
+        endDate: "03-10-2025",
+        where: {
+          lksdf: true,
+          what: [
+            "do",
+            "you",
+            {
+              sdf: "string",
+              test: 5,
+            },
+          ],
+        },
+      });
+    };
+    asyncFn();
+  }, []);
 
   if (user.isLoading) {
     return <>Loading...</>;

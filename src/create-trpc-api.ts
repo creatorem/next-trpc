@@ -12,7 +12,19 @@ const parseInput = (request: NextRequest, endpoint: Endpoint<any, any, any>) => 
 
   // Convert URLSearchParams to object
   for (const [key, value] of searchParams) {
-    paramsObj[key] = value;
+    try {
+      // Try to parse as JSON first, but only for complex types (arrays/objects)
+      // Skip JSON parsing for simple primitives to preserve string values
+      const parsed = JSON.parse(value);
+      if (Array.isArray(parsed) || (typeof parsed === 'object' && parsed !== null)) {
+        paramsObj[key] = parsed;
+      } else {
+        paramsObj[key] = value;
+      }
+    } catch {
+      // If JSON parsing fails, keep as string
+      paramsObj[key] = value;
+    }
   }
 
   // Validate input with endpoint schema

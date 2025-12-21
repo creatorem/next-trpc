@@ -32,7 +32,16 @@ export const getTrpcFetch =
     if (input) {
       const searchParams = new URLSearchParams();
       for (const [key, value] of Object.entries(input)) {
-        searchParams.append(key, String(value));
+        if (Array.isArray(value)) {
+          // Handle arrays by JSON stringifying them
+          searchParams.append(key, JSON.stringify(value));
+        } else if (value !== null && typeof value === 'object') {
+          // Handle objects by JSON stringifying them
+          searchParams.append(key, JSON.stringify(value));
+        } else {
+          // Handle primitive values as strings
+          searchParams.append(key, String(value));
+        }
       }
       requestUrl += `?${searchParams.toString()}`;
     }
