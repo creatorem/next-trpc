@@ -95,6 +95,24 @@ export const appRouter = ctx.router({
     .input(analyticsFetcherSchema)
     .action(async (inputs) => {
       console.log("analyticsFetcher");
+
+      // null: null,
+      // false: false,
+      // undefined: undefined,
+      // nan: NaN,
+      // number: 34,
+
+      console.log( {where: inputs.where} )
+      console.log( typeof inputs.where.null )
+      console.log( {null :typeof inputs.where.null} )
+      console.log( {false :typeof inputs.where.false} )
+      console.log( {undefined :typeof inputs.where.undefined} )
+      console.log( inputs.where.nan )
+      console.log( {nan :typeof inputs.where.nan} )
+      console.log( {number :typeof inputs.where.number} )
+
+      // if(typeof K === '')
+
       console.log({ inputs });
       return { test: true };
     }),

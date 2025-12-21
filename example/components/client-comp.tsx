@@ -22,15 +22,11 @@ export const ClientComp: React.FC = () => {
         organizationId: "qlmskjdqslmdf",
         endDate: "03-10-2025",
         where: {
-          lksdf: true,
-          what: [
-            "do",
-            "you",
-            {
-              sdf: "string",
-              test: 5,
-            },
-          ],
+          null: null,
+          false: false,
+          undefined: undefined,
+          nan: NaN,
+          number: 34,
         },
       });
     };

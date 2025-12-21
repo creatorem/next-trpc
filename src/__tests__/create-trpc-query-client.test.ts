@@ -3,6 +3,18 @@ import { createTrpcQueryClient } from '../create-trpc-query-client';
 import { endpoint, router } from '../core';
 import z from 'zod';
 
+// Helper function to create expected URL with Base64 encoding
+const createExpectedUrl = (baseUrl: string, input: any) => {
+  const serializedInput = JSON.stringify(input, (key, value) => {
+    if (Number.isNaN(value)) {
+      return '__NAN__';
+    }
+    return value;
+  });
+  const encoded = btoa(serializedInput);
+  return `${baseUrl}?input=${encodeURIComponent(encoded)}`;
+};
+
 // Mock fetch
 const mockFetch = jest.fn() as jest.MockedFunction<typeof fetch>;
 global.fetch = mockFetch;
@@ -62,7 +74,7 @@ describe('create-trpc-query-client', () => {
       const result = await (client as any).getUser.fetch({ id: '123' });
 
       expect(mockFetch).toHaveBeenCalledWith(
-        'http://localhost:3000/api/trpc/get-user?id=123',
+        createExpectedUrl('http://localhost:3000/api/trpc/get-user', { id: '123' }),
         {
           method: 'GET',
           headers: {

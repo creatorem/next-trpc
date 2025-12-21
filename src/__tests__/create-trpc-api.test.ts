@@ -1,6 +1,20 @@
 import { describe, it, expect, jest } from '@jest/globals';
 import z from 'zod';
 
+// Helper function to create mock request with Base64 encoded input
+const createMockRequest = (input: any) => {
+  const serializedInput = JSON.stringify(input, (key, value) => {
+    if (Number.isNaN(value)) {
+      return '__NAN__';
+    }
+    return value;
+  });
+  const encoded = btoa(serializedInput);
+  const searchParams = new URLSearchParams();
+  searchParams.set('input', encoded);
+  return { nextUrl: { searchParams } };
+};
+
 // Mock the dependencies we can't import in test environment
 jest.mock('next/server', () => ({
   NextResponse: {
@@ -119,8 +133,7 @@ describe('create-trpc-api', () => {
         getUser: endpoint.input(schema).action(mockAction)
       });
       
-      const searchParams = new URLSearchParams('id=123');
-      const mockRequest = { nextUrl: { searchParams } };
+      const mockRequest = createMockRequest({ id: '123' });
       const handler = createTrpcAPI({ router: testRouter });
       
       await handler(mockRequest as any, { params: Promise.resolve({ trpc: 'get-user' }) });
@@ -162,8 +175,7 @@ describe('create-trpc-api', () => {
         getUser: endpoint.input(schema).action(mockAction)
       });
       
-      const searchParams = new URLSearchParams('id=');
-      const mockRequest = { nextUrl: { searchParams } };
+      const mockRequest = createMockRequest({ id: '' });
       const handler = createTrpcAPI({ router: testRouter });
       
       await handler(mockRequest as any, { params: Promise.resolve({ trpc: 'get-user' }) });
@@ -220,8 +232,7 @@ describe('create-trpc-api', () => {
         createUser: endpoint.input(schema).action(mockAction)
       });
       
-      const searchParams = new URLSearchParams('name=John&age=30');
-      const mockRequest = { nextUrl: { searchParams } };
+      const mockRequest = createMockRequest({ name: 'John', age: '30' });
       const handler = createTrpcAPI({ router: testRouter });
       
       await handler(mockRequest as any, { params: Promise.resolve({ trpc: 'create-user' }) });

@@ -16,6 +16,21 @@ type TrpcClient<R extends Router<any>> = {
     : never;
 };
 
+function serialize(str: string): string {
+  return btoa(
+    encodeURIComponent(
+      JSON.stringify(str, (key, value) => {
+        if (Number.isNaN(value)) {
+          return "__NAN__";
+        }
+        return value;
+      })
+    ).replace(/%([0-9A-F]{2})/g, function (match, p1) {
+      return String.fromCharCode(parseInt(p1, 16));
+    })
+  );
+}
+
 export const getTrpcFetch =
   ({
     endpointSlug,
@@ -30,20 +45,7 @@ export const getTrpcFetch =
     // Build URL with search params if input exists
     let requestUrl = `${url}/${endpointName}`;
     if (input) {
-      const searchParams = new URLSearchParams();
-      for (const [key, value] of Object.entries(input)) {
-        if (Array.isArray(value)) {
-          // Handle arrays by JSON stringifying them
-          searchParams.append(key, JSON.stringify(value));
-        } else if (value !== null && typeof value === 'object') {
-          // Handle objects by JSON stringifying them
-          searchParams.append(key, JSON.stringify(value));
-        } else {
-          // Handle primitive values as strings
-          searchParams.append(key, String(value));
-        }
-      }
-      requestUrl += `?${searchParams.toString()}`;
+      requestUrl += `?input=${serialize(input)}`;
     }
 
     const headerObject =

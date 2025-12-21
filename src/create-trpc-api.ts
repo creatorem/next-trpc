@@ -4,31 +4,32 @@ import { type NextRequest, NextResponse } from "next/server";
 import { type router as routerFn, type Endpoint, Router } from "./core";
 import { camelize } from "./utils";
 
+function deserialize(str: string): string {
+  return JSON.parse(decodeURIComponent(
+    Array.prototype.map
+      .call(atob(str), function (c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
+      })
+      .join(''),
+  ),  (key, value) => {
+    if (value === '__NAN__') {
+      return NaN;
+    }
+    return value;
+  })
+}
+
 const parseInput = (request: NextRequest, endpoint: Endpoint<any, any, any>) => {
   if (!endpoint.input) return undefined;
 
   const searchParams = request.nextUrl.searchParams;
-  const paramsObj: Record<string, any> = {};
+  const input = searchParams.get('input')
 
-  // Convert URLSearchParams to object
-  for (const [key, value] of searchParams) {
-    try {
-      // Try to parse as JSON first, but only for complex types (arrays/objects)
-      // Skip JSON parsing for simple primitives to preserve string values
-      const parsed = JSON.parse(value);
-      if (Array.isArray(parsed) || (typeof parsed === 'object' && parsed !== null)) {
-        paramsObj[key] = parsed;
-      } else {
-        paramsObj[key] = value;
-      }
-    } catch {
-      // If JSON parsing fails, keep as string
-      paramsObj[key] = value;
-    }
+  if(!input){
+    throw new Error('"input" not defined in the search params.')
   }
 
-  // Validate input with endpoint schema
-  return endpoint.input.parse(paramsObj);
+  return endpoint.input.parse(deserialize(input));
 };
 
 export const createTrpcAPI = <Ctx>({

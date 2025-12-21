@@ -2,6 +2,32 @@ import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import { getTrpcFetch } from '../create-trpc-client';
 import z from 'zod';
 
+// Helper function to create expected URL with Base64 encoding
+const createExpectedUrl = (baseUrl: string, input: any) => {
+  const serializedInput = JSON.stringify(input, (key, value) => {
+    if (Number.isNaN(value)) {
+      return '__NAN__';
+    }
+    return value;
+  });
+  const encoded = btoa(serializedInput);
+  return `${baseUrl}?input=${encodeURIComponent(encoded)}`;
+};
+
+// Helper function to create mock request with Base64 encoded input
+const createMockRequest = (input: any) => {
+  const serializedInput = JSON.stringify(input, (key, value) => {
+    if (Number.isNaN(value)) {
+      return '__NAN__';
+    }
+    return value;
+  });
+  const encoded = btoa(serializedInput);
+  const searchParams = new URLSearchParams();
+  searchParams.set('input', encoded);
+  return { nextUrl: { searchParams } };
+};
+
 // Mock fetch
 const mockFetch = jest.fn() as jest.MockedFunction<typeof fetch>;
 global.fetch = mockFetch;
@@ -45,7 +71,7 @@ describe('Serialization/Deserialization', () => {
       await fetchFn({ contentTypes: ['booking', 'payment', 'user'] });
 
       expect(mockFetch).toHaveBeenCalledWith(
-        'http://localhost:3000/api/trpc/test-endpoint?contentTypes=%5B%22booking%22%2C%22payment%22%2C%22user%22%5D',
+        createExpectedUrl('http://localhost:3000/api/trpc/test-endpoint', { contentTypes: ['booking', 'payment', 'user'] }),
         expect.any(Object)
       );
     });
@@ -65,7 +91,7 @@ describe('Serialization/Deserialization', () => {
       await fetchFn({ ids: [1, 2, 3, 4, 5] });
 
       expect(mockFetch).toHaveBeenCalledWith(
-        'http://localhost:3000/api/trpc/test-endpoint?ids=%5B1%2C2%2C3%2C4%2C5%5D',
+        createExpectedUrl('http://localhost:3000/api/trpc/test-endpoint', { ids: [1, 2, 3, 4, 5] }),
         expect.any(Object)
       );
     });
@@ -85,7 +111,7 @@ describe('Serialization/Deserialization', () => {
       await fetchFn({ flags: [true, false, true] });
 
       expect(mockFetch).toHaveBeenCalledWith(
-        'http://localhost:3000/api/trpc/test-endpoint?flags=%5Btrue%2Cfalse%2Ctrue%5D',
+        createExpectedUrl('http://localhost:3000/api/trpc/test-endpoint', { flags: [true, false, true] }),
         expect.any(Object)
       );
     });
@@ -105,7 +131,7 @@ describe('Serialization/Deserialization', () => {
       await fetchFn({ mixed: ['string', 123, true, null] });
 
       expect(mockFetch).toHaveBeenCalledWith(
-        'http://localhost:3000/api/trpc/test-endpoint?mixed=%5B%22string%22%2C123%2Ctrue%2Cnull%5D',
+        createExpectedUrl('http://localhost:3000/api/trpc/test-endpoint', { mixed: ['string', 123, true, null] }),
         expect.any(Object)
       );
     });
@@ -125,7 +151,7 @@ describe('Serialization/Deserialization', () => {
       await fetchFn({ emptyArray: [] });
 
       expect(mockFetch).toHaveBeenCalledWith(
-        'http://localhost:3000/api/trpc/test-endpoint?emptyArray=%5B%5D',
+        createExpectedUrl('http://localhost:3000/api/trpc/test-endpoint', { emptyArray: [] }),
         expect.any(Object)
       );
     });
@@ -145,7 +171,7 @@ describe('Serialization/Deserialization', () => {
       await fetchFn({ matrix: [[1, 2], [3, 4], [5, 6]] });
 
       expect(mockFetch).toHaveBeenCalledWith(
-        'http://localhost:3000/api/trpc/test-endpoint?matrix=%5B%5B1%2C2%5D%2C%5B3%2C4%5D%2C%5B5%2C6%5D%5D',
+        createExpectedUrl('http://localhost:3000/api/trpc/test-endpoint', { matrix: [[1, 2], [3, 4], [5, 6]] }),
         expect.any(Object)
       );
     });
@@ -167,7 +193,7 @@ describe('Serialization/Deserialization', () => {
       await fetchFn({ where: { status: 'active', type: 'premium' } });
 
       expect(mockFetch).toHaveBeenCalledWith(
-        'http://localhost:3000/api/trpc/test-endpoint?where=%7B%22status%22%3A%22active%22%2C%22type%22%3A%22premium%22%7D',
+        createExpectedUrl('http://localhost:3000/api/trpc/test-endpoint', { where: { status: 'active', type: 'premium' } }),
         expect.any(Object)
       );
     });
@@ -192,7 +218,12 @@ describe('Serialization/Deserialization', () => {
       });
 
       expect(mockFetch).toHaveBeenCalledWith(
-        'http://localhost:3000/api/trpc/test-endpoint?filter=%7B%22user%22%3A%7B%22name%22%3A%22John%22%2C%22age%22%3A30%7D%2C%22settings%22%3A%7B%22theme%22%3A%22dark%22%2C%22notifications%22%3Atrue%7D%7D',
+        createExpectedUrl('http://localhost:3000/api/trpc/test-endpoint', { 
+          filter: { 
+            user: { name: 'John', age: 30 },
+            settings: { theme: 'dark', notifications: true }
+          } 
+        }),
         expect.any(Object)
       );
     });
@@ -218,7 +249,13 @@ describe('Serialization/Deserialization', () => {
       });
 
       expect(mockFetch).toHaveBeenCalledWith(
-        'http://localhost:3000/api/trpc/test-endpoint?config=%7B%22tags%22%3A%5B%22urgent%22%2C%22important%22%5D%2C%22permissions%22%3A%5B1%2C2%2C3%5D%2C%22enabled%22%3A%5Btrue%2Cfalse%5D%7D',
+        createExpectedUrl('http://localhost:3000/api/trpc/test-endpoint', { 
+          config: { 
+            tags: ['urgent', 'important'],
+            permissions: [1, 2, 3],
+            enabled: [true, false]
+          } 
+        }),
         expect.any(Object)
       );
     });
@@ -238,7 +275,7 @@ describe('Serialization/Deserialization', () => {
       await fetchFn({ emptyObj: {} });
 
       expect(mockFetch).toHaveBeenCalledWith(
-        'http://localhost:3000/api/trpc/test-endpoint?emptyObj=%7B%7D',
+        createExpectedUrl('http://localhost:3000/api/trpc/test-endpoint', { emptyObj: {} }),
         expect.any(Object)
       );
     });
@@ -265,7 +302,13 @@ describe('Serialization/Deserialization', () => {
       });
 
       expect(mockFetch).toHaveBeenCalledWith(
-        'http://localhost:3000/api/trpc/test-endpoint?data=%7B%22nullValue%22%3Anull%2C%22falseValue%22%3Afalse%2C%22zeroValue%22%3A0%7D',
+        createExpectedUrl('http://localhost:3000/api/trpc/test-endpoint', { 
+          data: { 
+            nullValue: null,
+            falseValue: false,
+            zeroValue: 0
+          } 
+        }),
         expect.any(Object)
       );
     });
@@ -293,8 +336,17 @@ describe('Serialization/Deserialization', () => {
         limit: 100
       });
 
-      const expectedUrl = 'http://localhost:3000/api/trpc/analytics-fetcher?contentTypes=%5B%22booking%22%2C%22payment%22%5D&organizationId=qlmskjdqslmdf&endDate=03-10-2025&where=%7B%22status%22%3A%22active%22%2C%22priority%22%3A1%7D&includeArchived=false&limit=100';
-      expect(mockFetch).toHaveBeenCalledWith(expectedUrl, expect.any(Object));
+      expect(mockFetch).toHaveBeenCalledWith(
+        createExpectedUrl('http://localhost:3000/api/trpc/analytics-fetcher', {
+          contentTypes: ['booking', 'payment'],
+          organizationId: 'qlmskjdqslmdf',
+          endDate: '03-10-2025',
+          where: { status: 'active', priority: 1 },
+          includeArchived: false,
+          limit: 100
+        }),
+        expect.any(Object)
+      );
     });
 
     it('handles arrays of objects correctly', async () => {
@@ -317,7 +369,12 @@ describe('Serialization/Deserialization', () => {
       });
 
       expect(mockFetch).toHaveBeenCalledWith(
-        'http://localhost:3000/api/trpc/test-endpoint?users=%5B%7B%22id%22%3A1%2C%22name%22%3A%22John%22%7D%2C%7B%22id%22%3A2%2C%22name%22%3A%22Jane%22%7D%5D',
+        createExpectedUrl('http://localhost:3000/api/trpc/test-endpoint', {
+          users: [
+            { id: 1, name: 'John' },
+            { id: 2, name: 'Jane' }
+          ]
+        }),
         expect.any(Object)
       );
     });
@@ -342,7 +399,12 @@ describe('Serialization/Deserialization', () => {
       });
 
       expect(mockFetch).toHaveBeenCalledWith(
-        'http://localhost:3000/api/trpc/test-endpoint?stringValue=hello+world&numberValue=42&booleanValue=true&nullValue=null',
+        createExpectedUrl('http://localhost:3000/api/trpc/test-endpoint', {
+          stringValue: 'hello world',
+          numberValue: 42,
+          booleanValue: true,
+          nullValue: null
+        }),
         expect.any(Object)
       );
     });
@@ -358,9 +420,7 @@ describe('Serialization/Deserialization', () => {
         testEndpoint: endpoint.input(schema).action(mockAction)
       });
 
-      const searchParams = new URLSearchParams();
-      searchParams.set('contentTypes', JSON.stringify(['booking', 'payment', 'user']));
-      const mockRequest = { nextUrl: { searchParams } };
+      const mockRequest = createMockRequest({ contentTypes: ['booking', 'payment', 'user'] });
       const handler = createTrpcAPI({ router: testRouter });
 
       await handler(mockRequest as any, { params: Promise.resolve({ trpc: 'test-endpoint' }) });
@@ -380,9 +440,7 @@ describe('Serialization/Deserialization', () => {
         testEndpoint: endpoint.input(schema).action(mockAction)
       });
 
-      const searchParams = new URLSearchParams();
-      searchParams.set('ids', JSON.stringify([1, 2, 3, 4, 5]));
-      const mockRequest = { nextUrl: { searchParams } };
+      const mockRequest = createMockRequest({ ids: [1, 2, 3, 4, 5] });
       const handler = createTrpcAPI({ router: testRouter });
 
       await handler(mockRequest as any, { params: Promise.resolve({ trpc: 'test-endpoint' }) });
@@ -402,9 +460,7 @@ describe('Serialization/Deserialization', () => {
         testEndpoint: endpoint.input(schema).action(mockAction)
       });
 
-      const searchParams = new URLSearchParams();
-      searchParams.set('flags', JSON.stringify([true, false, true]));
-      const mockRequest = { nextUrl: { searchParams } };
+      const mockRequest = createMockRequest({ flags: [true, false, true] });
       const handler = createTrpcAPI({ router: testRouter });
 
       await handler(mockRequest as any, { params: Promise.resolve({ trpc: 'test-endpoint' }) });
@@ -424,9 +480,7 @@ describe('Serialization/Deserialization', () => {
         testEndpoint: endpoint.input(schema).action(mockAction)
       });
 
-      const searchParams = new URLSearchParams();
-      searchParams.set('emptyArray', JSON.stringify([]));
-      const mockRequest = { nextUrl: { searchParams } };
+      const mockRequest = createMockRequest({ emptyArray: [] });
       const handler = createTrpcAPI({ router: testRouter });
 
       await handler(mockRequest as any, { params: Promise.resolve({ trpc: 'test-endpoint' }) });
@@ -446,9 +500,7 @@ describe('Serialization/Deserialization', () => {
         testEndpoint: endpoint.input(schema).action(mockAction)
       });
 
-      const searchParams = new URLSearchParams();
-      searchParams.set('matrix', JSON.stringify([[1, 2], [3, 4], [5, 6]]));
-      const mockRequest = { nextUrl: { searchParams } };
+      const mockRequest = createMockRequest({ matrix: [[1, 2], [3, 4], [5, 6]] });
       const handler = createTrpcAPI({ router: testRouter });
 
       await handler(mockRequest as any, { params: Promise.resolve({ trpc: 'test-endpoint' }) });
@@ -473,9 +525,7 @@ describe('Serialization/Deserialization', () => {
         testEndpoint: endpoint.input(schema).action(mockAction)
       });
 
-      const searchParams = new URLSearchParams();
-      searchParams.set('where', JSON.stringify({ status: 'active', type: 'premium' }));
-      const mockRequest = { nextUrl: { searchParams } };
+      const mockRequest = createMockRequest({ where: { status: 'active', type: 'premium' } });
       const handler = createTrpcAPI({ router: testRouter });
 
       await handler(mockRequest as any, { params: Promise.resolve({ trpc: 'test-endpoint' }) });
@@ -504,12 +554,12 @@ describe('Serialization/Deserialization', () => {
         testEndpoint: endpoint.input(schema).action(mockAction)
       });
 
-      const searchParams = new URLSearchParams();
-      searchParams.set('filter', JSON.stringify({ 
-        user: { name: 'John', age: 30 },
-        settings: { theme: 'dark', notifications: true }
-      }));
-      const mockRequest = { nextUrl: { searchParams } };
+      const mockRequest = createMockRequest({ 
+        filter: { 
+          user: { name: 'John', age: 30 },
+          settings: { theme: 'dark', notifications: true }
+        }
+      });
       const handler = createTrpcAPI({ router: testRouter });
 
       await handler(mockRequest as any, { params: Promise.resolve({ trpc: 'test-endpoint' }) });
@@ -532,9 +582,7 @@ describe('Serialization/Deserialization', () => {
         testEndpoint: endpoint.input(schema).action(mockAction)
       });
 
-      const searchParams = new URLSearchParams();
-      searchParams.set('emptyObj', JSON.stringify({}));
-      const mockRequest = { nextUrl: { searchParams } };
+      const mockRequest = createMockRequest({ emptyObj: {} });
       const handler = createTrpcAPI({ router: testRouter });
 
       await handler(mockRequest as any, { params: Promise.resolve({ trpc: 'test-endpoint' }) });
@@ -556,7 +604,7 @@ describe('Serialization/Deserialization', () => {
           status: z.string(),
           priority: z.number()
         }),
-        includeArchived: z.string().transform((val) => val === 'true'),
+        includeArchived: z.boolean(),
         limit: z.coerce.number()
       });
       const mockAction = jest.fn().mockReturnValue({ success: true });
@@ -564,15 +612,14 @@ describe('Serialization/Deserialization', () => {
         analyticsFetcher: endpoint.input(schema).action(mockAction)
       });
 
-      const searchParams = new URLSearchParams();
-      searchParams.set('contentTypes', JSON.stringify(['booking', 'payment']));
-      searchParams.set('organizationId', 'qlmskjdqslmdf');
-      searchParams.set('endDate', '03-10-2025');
-      searchParams.set('where', JSON.stringify({ status: 'active', priority: 1 }));
-      searchParams.set('includeArchived', 'false');
-      searchParams.set('limit', '100');
-
-      const mockRequest = { nextUrl: { searchParams } };
+      const mockRequest = createMockRequest({
+        contentTypes: ['booking', 'payment'],
+        organizationId: 'qlmskjdqslmdf',
+        endDate: '03-10-2025',
+        where: { status: 'active', priority: 1 },
+        includeArchived: false,
+        limit: 100
+      });
       const handler = createTrpcAPI({ router: testRouter });
 
       await handler(mockRequest as any, { params: Promise.resolve({ trpc: 'analytics-fetcher' }) });
@@ -602,13 +649,12 @@ describe('Serialization/Deserialization', () => {
         testEndpoint: endpoint.input(schema).action(mockAction)
       });
 
-      const searchParams = new URLSearchParams();
-      searchParams.set('users', JSON.stringify([
-        { id: 1, name: 'John' },
-        { id: 2, name: 'Jane' }
-      ]));
-
-      const mockRequest = { nextUrl: { searchParams } };
+      const mockRequest = createMockRequest({
+        users: [
+          { id: 1, name: 'John' },
+          { id: 2, name: 'Jane' }
+        ]
+      });
       const handler = createTrpcAPI({ router: testRouter });
 
       await handler(mockRequest as any, { params: Promise.resolve({ trpc: 'test-endpoint' }) });
@@ -624,29 +670,28 @@ describe('Serialization/Deserialization', () => {
       );
     });
 
-    it('falls back to string parsing for invalid JSON', async () => {
+    it('handles all data types correctly with Base64 encoding', async () => {
       const schema = z.object({
-        validJson: z.array(z.string()),
-        invalidJson: z.string()
+        array: z.array(z.string()),
+        string: z.string()
       });
       const mockAction = jest.fn().mockReturnValue({ success: true });
       const testRouter = router({
         testEndpoint: endpoint.input(schema).action(mockAction)
       });
 
-      const searchParams = new URLSearchParams();
-      searchParams.set('validJson', JSON.stringify(['valid', 'array']));
-      searchParams.set('invalidJson', 'not-valid-json');
-
-      const mockRequest = { nextUrl: { searchParams } };
+      const mockRequest = createMockRequest({
+        array: ['valid', 'array'],
+        string: 'simple-string'
+      });
       const handler = createTrpcAPI({ router: testRouter });
 
       await handler(mockRequest as any, { params: Promise.resolve({ trpc: 'test-endpoint' }) });
 
       expect(mockAction).toHaveBeenCalledWith(
         {
-          validJson: ['valid', 'array'],
-          invalidJson: 'not-valid-json'
+          array: ['valid', 'array'],
+          string: 'simple-string'
         },
         { request: mockRequest }
       );
@@ -669,8 +714,121 @@ describe('Serialization/Deserialization', () => {
       await fetchFn({ nullValue: null });
 
       expect(mockFetch).toHaveBeenCalledWith(
-        'http://localhost:3000/api/trpc/test-endpoint?nullValue=null',
+        createExpectedUrl('http://localhost:3000/api/trpc/test-endpoint', { nullValue: null }),
         expect.any(Object)
+      );
+    });
+
+    it('serializes boolean values correctly', async () => {
+      const mockResponse = {
+        ok: true,
+        json: jest.fn().mockResolvedValue({ data: { success: true } })
+      };
+      mockFetch.mockResolvedValue(mockResponse as any);
+
+      const fetchFn = getTrpcFetch({
+        endpointSlug: 'testEndpoint',
+        url: 'http://localhost:3000/api/trpc',
+      });
+
+      await fetchFn({ 
+        trueValue: true, 
+        falseValue: false 
+      });
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        createExpectedUrl('http://localhost:3000/api/trpc/test-endpoint', { 
+          trueValue: true, 
+          falseValue: false 
+        }),
+        expect.any(Object)
+      );
+    });
+
+    it('serializes NaN values correctly', async () => {
+      const mockResponse = {
+        ok: true,
+        json: jest.fn().mockResolvedValue({ data: { success: true } })
+      };
+      mockFetch.mockResolvedValue(mockResponse as any);
+
+      const fetchFn = getTrpcFetch({
+        endpointSlug: 'testEndpoint',
+        url: 'http://localhost:3000/api/trpc',
+      });
+
+      await fetchFn({ nanValue: NaN });
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        createExpectedUrl('http://localhost:3000/api/trpc/test-endpoint', { nanValue: NaN }),
+        expect.any(Object)
+      );
+    });
+
+    it('deserializes boolean values correctly', async () => {
+      const schema = z.object({
+        trueValue: z.boolean(),
+        falseValue: z.boolean()
+      });
+      const mockAction = jest.fn().mockReturnValue({ success: true });
+      const testRouter = router({
+        testEndpoint: endpoint.input(schema).action(mockAction)
+      });
+
+      const mockRequest = createMockRequest({
+        trueValue: true,
+        falseValue: false
+      });
+      const handler = createTrpcAPI({ router: testRouter });
+
+      await handler(mockRequest as any, { params: Promise.resolve({ trpc: 'test-endpoint' }) });
+
+      expect(mockAction).toHaveBeenCalledWith(
+        {
+          trueValue: true,
+          falseValue: false
+        },
+        { request: mockRequest }
+      );
+    });
+
+    it('deserializes null values correctly', async () => {
+      const schema = z.object({
+        nullValue: z.null()
+      });
+      const mockAction = jest.fn().mockReturnValue({ success: true });
+      const testRouter = router({
+        testEndpoint: endpoint.input(schema).action(mockAction)
+      });
+
+      const mockRequest = createMockRequest({ nullValue: null });
+      const handler = createTrpcAPI({ router: testRouter });
+
+      await handler(mockRequest as any, { params: Promise.resolve({ trpc: 'test-endpoint' }) });
+
+      expect(mockAction).toHaveBeenCalledWith(
+        { nullValue: null },
+        { request: mockRequest }
+      );
+    });
+
+    it('deserializes NaN values correctly', async () => {
+      const schema = z.object({
+        nanValue: z.any() // Use z.any() because Zod doesn't consider NaN as a valid number
+      });
+      const mockAction = jest.fn().mockReturnValue({ success: true });
+      const testRouter = router({
+        testEndpoint: endpoint.input(schema).action(mockAction)
+      });
+
+      const mockRequest = createMockRequest({ nanValue: NaN });
+      const handler = createTrpcAPI({ router: testRouter });
+
+      await handler(mockRequest as any, { params: Promise.resolve({ trpc: 'test-endpoint' }) });
+
+      expect(mockAction).toHaveBeenCalledWith(
+        { nanValue: NaN }, // NaN is now preserved with custom serialization
+        { request: mockRequest }
       );
     });
 
@@ -684,11 +842,10 @@ describe('Serialization/Deserialization', () => {
         testEndpoint: endpoint.input(schema).action(mockAction)
       });
 
-      const searchParams = new URLSearchParams();
-      searchParams.set('validJson', JSON.stringify(['valid', 'array']));
-      searchParams.set('invalidJson', 'plain-string-not-json');
-
-      const mockRequest = { nextUrl: { searchParams } };
+      const mockRequest = createMockRequest({
+        validJson: ['valid', 'array'],
+        invalidJson: 'plain-string-not-json'
+      });
       const handler = createTrpcAPI({ router: testRouter });
 
       await handler(mockRequest as any, { params: Promise.resolve({ trpc: 'test-endpoint' }) });
@@ -702,12 +859,12 @@ describe('Serialization/Deserialization', () => {
       );
     });
 
-    it('preserves primitive values as strings even when they are valid JSON', async () => {
+    it('correctly parses JSON primitives vs preserves string primitives', async () => {
       const schema = z.object({
         stringId: z.string(),
         stringAge: z.string(),
-        boolString: z.string(),
-        nullString: z.string(),
+        boolValue: z.boolean(), // Now expects actual boolean
+        nullValue: z.null(), // Now expects actual null
         arrayData: z.array(z.string()),
         objectData: z.object({ key: z.string() })
       });
@@ -716,15 +873,14 @@ describe('Serialization/Deserialization', () => {
         testEndpoint: endpoint.input(schema).action(mockAction)
       });
 
-      const searchParams = new URLSearchParams();
-      searchParams.set('stringId', '123'); // Valid JSON number, but kept as string
-      searchParams.set('stringAge', '30'); // Valid JSON number, but kept as string  
-      searchParams.set('boolString', 'true'); // Valid JSON boolean, but kept as string
-      searchParams.set('nullString', 'null'); // Valid JSON null, but kept as string
-      searchParams.set('arrayData', JSON.stringify(['item1', 'item2'])); // Array parsed as JSON
-      searchParams.set('objectData', JSON.stringify({ key: 'value' })); // Object parsed as JSON
-
-      const mockRequest = { nextUrl: { searchParams } };
+      const mockRequest = createMockRequest({
+        stringId: '123',
+        stringAge: '30',
+        boolValue: true,
+        nullValue: null,
+        arrayData: ['item1', 'item2'],
+        objectData: { key: 'value' }
+      });
       const handler = createTrpcAPI({ router: testRouter });
 
       await handler(mockRequest as any, { params: Promise.resolve({ trpc: 'test-endpoint' }) });
@@ -733,8 +889,8 @@ describe('Serialization/Deserialization', () => {
         {
           stringId: '123', // String, not number 123
           stringAge: '30', // String, not number 30
-          boolString: 'true', // String, not boolean true
-          nullString: 'null', // String, not null value
+          boolValue: true, // Boolean parsed from JSON
+          nullValue: null, // Null parsed from JSON
           arrayData: ['item1', 'item2'], // Parsed array
           objectData: { key: 'value' } // Parsed object
         },
@@ -758,7 +914,7 @@ describe('Serialization/Deserialization', () => {
       await fetchFn({ largeData: largeArray });
 
       expect(mockFetch).toHaveBeenCalledWith(
-        expect.stringContaining('http://localhost:3000/api/trpc/test-endpoint?largeData='),
+        createExpectedUrl('http://localhost:3000/api/trpc/test-endpoint', { largeData: largeArray }),
         expect.any(Object)
       );
     });
@@ -793,7 +949,7 @@ describe('Serialization/Deserialization', () => {
       await fetchFn({ deepData: deepObject });
 
       expect(mockFetch).toHaveBeenCalledWith(
-        expect.stringContaining('http://localhost:3000/api/trpc/test-endpoint?deepData='),
+        createExpectedUrl('http://localhost:3000/api/trpc/test-endpoint', { deepData: deepObject }),
         expect.any(Object)
       );
     });
@@ -829,23 +985,53 @@ describe('Serialization/Deserialization', () => {
         testEndpoint: endpoint.input(schema).action(mockAction)
       });
 
-      // Simulate serialization (client-side)
-      const searchParams = new URLSearchParams();
-      for (const [key, value] of Object.entries(originalData)) {
-        if (Array.isArray(value) || (value !== null && typeof value === 'object')) {
-          searchParams.set(key, JSON.stringify(value));
-        } else {
-          searchParams.set(key, String(value));
-        }
-      }
-
-      // Simulate deserialization (server-side)
-      const mockRequest = { nextUrl: { searchParams } };
+      // Simulate serialization/deserialization with Base64 approach
+      const mockRequest = createMockRequest(originalData);
       const handler = createTrpcAPI({ router: testRouter });
 
       await handler(mockRequest as any, { params: Promise.resolve({ trpc: 'test-endpoint' }) });
 
       expect(deserializedData).toEqual(originalData);
+    });
+
+    it('round-trip serialization/deserialization for special primitives', async () => {
+      const originalData = {
+        nullValue: null,
+        trueValue: true,
+        falseValue: false,
+        // Note: NaN becomes null after JSON serialization, so we test that behavior
+        normalNumber: 42
+      };
+
+      const schema = z.object({
+        nullValue: z.null(),
+        trueValue: z.boolean(), 
+        falseValue: z.boolean(),
+        normalNumber: z.coerce.number()
+      });
+
+      let deserializedData: any;
+      const mockAction = jest.fn().mockImplementation((input) => {
+        deserializedData = input;
+        return { success: true };
+      });
+
+      const testRouter = router({
+        testEndpoint: endpoint.input(schema).action(mockAction)
+      });
+
+      // Simulate serialization/deserialization with Base64 approach
+      const mockRequest = createMockRequest(originalData);
+      const handler = createTrpcAPI({ router: testRouter });
+
+      await handler(mockRequest as any, { params: Promise.resolve({ trpc: 'test-endpoint' }) });
+
+      expect(deserializedData).toEqual({
+        nullValue: null,
+        trueValue: true,
+        falseValue: false,
+        normalNumber: 42
+      });
     });
   });
 });

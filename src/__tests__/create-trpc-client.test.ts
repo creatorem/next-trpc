@@ -3,6 +3,18 @@ import { createTrpcClient, getTrpcFetch } from '../create-trpc-client';
 import { endpoint, router } from '../core';
 import z from 'zod';
 
+// Helper function to create expected URL with Base64 encoding
+const createExpectedUrl = (baseUrl: string, input: any) => {
+  const serializedInput = JSON.stringify(input, (key, value) => {
+    if (Number.isNaN(value)) {
+      return '__NAN__';
+    }
+    return value;
+  });
+  const encoded = btoa(serializedInput);
+  return `${baseUrl}?input=${encodeURIComponent(encoded)}`;
+};
+
 // Mock fetch
 const mockFetch = jest.fn() as jest.MockedFunction<typeof fetch>;
 global.fetch = mockFetch;
@@ -58,7 +70,7 @@ describe('create-trpc-client', () => {
       const result = await fetchFn({ id: '123', active: true });
 
       expect(mockFetch).toHaveBeenCalledWith(
-        'http://localhost:3000/api/trpc/get-user?id=123&active=true',
+        createExpectedUrl('http://localhost:3000/api/trpc/get-user', { id: '123', active: true }),
         {
           method: 'GET',
           headers: {
@@ -206,7 +218,7 @@ describe('create-trpc-client', () => {
       await fetchFn(complexInput);
 
       expect(mockFetch).toHaveBeenCalledWith(
-        'http://localhost:3000/api/trpc/create-user?name=John+Doe&age=30&active=true&metadata=%7B%22key%22%3A%22value%22%7D',
+        createExpectedUrl('http://localhost:3000/api/trpc/create-user', complexInput),
         expect.any(Object)
       );
     });
@@ -302,7 +314,7 @@ describe('create-trpc-client', () => {
       // Call with parameters
       await (client as any).withParams.fetch({ id: '123' });
       expect(mockFetch).toHaveBeenCalledWith(
-        'http://localhost:3000/api/trpc/with-params?id=123',
+        createExpectedUrl('http://localhost:3000/api/trpc/with-params', { id: '123' }),
         expect.any(Object)
       );
     });
