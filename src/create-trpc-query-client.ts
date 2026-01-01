@@ -9,7 +9,7 @@ import {
 import type { Router, Endpoint, router } from "./core";
 import z from "zod";
 
-type TrpcClientWithQuery<R extends Router<any>> = {
+export type TrpcClientWithQuery<R extends Router<any>> = {
   [K in keyof R]: R[K] extends Endpoint<infer Output, infer Input, any>
     ? EndpointClient<Input, Output> & {
         useQuery: Input extends import("zod").Schema
