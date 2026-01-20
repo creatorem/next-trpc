@@ -3,17 +3,18 @@ import { kebabize } from "./utils";
 import z from "zod";
 
 export type EndpointClient<Input, Output> = Input extends undefined
-  ? { fetch: () => Promise<Output> }
+  ? { fetch: () => Promise<Output>, key: string }
   : {
-      fetch: (
-        input: Input extends import("zod").Schema ? z.infer<Input> : Input
-      ) => Promise<Output>;
-    };
+    fetch: (
+      input: Input extends import("zod").Schema ? z.infer<Input> : Input
+    ) => Promise<Output>;
+    key: string
+  };
 
 type TrpcClient<R extends Router<any>> = {
   [K in keyof R]: R[K] extends Endpoint<infer Output, infer Input, any>
-    ? EndpointClient<Input, Output>
-    : never;
+  ? EndpointClient<Input, Output>
+  : never;
 };
 
 function serialize(str: string): string {
@@ -39,33 +40,33 @@ export const getTrpcFetch =
   }: {
     endpointSlug: string;
   } & createTrpcClientOptions) =>
-  async (input?: any) => {
-    const endpointName = kebabize(endpointSlug);
+    async (input?: any) => {
+      const endpointName = kebabize(endpointSlug);
 
-    // Build URL with search params if input exists
-    let requestUrl = `${url}/${endpointName}`;
-    if (input) {
-      requestUrl += `?input=${serialize(input)}`;
-    }
+      // Build URL with search params if input exists
+      let requestUrl = `${url}/${endpointName}`;
+      if (input) {
+        requestUrl += `?input=${serialize(input)}`;
+      }
 
-    const headerObject =
-      typeof headers === "function" ? await headers() : headers || {};
-    const response = await fetch(requestUrl, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        ...headerObject,
-      },
-    });
+      const headerObject =
+        typeof headers === "function" ? await headers() : headers || {};
+      const response = await fetch(requestUrl, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          ...headerObject,
+        },
+      });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || "Request failed");
-    }
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Request failed");
+      }
 
-    const result = await response.json();
-    return result.data;
-  };
+      const result = await response.json();
+      return result.data;
+    };
 
 export interface createTrpcClientOptions {
   url: string;
@@ -85,6 +86,7 @@ export const createTrpcClient = <
             endpointSlug: prop,
             ...opts,
           }),
+          key: kebabize(prop)
         };
       }
       return undefined;
