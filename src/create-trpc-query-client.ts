@@ -8,41 +8,42 @@ import {
 } from "./create-trpc-client";
 import type { Router, Endpoint, router } from "./core";
 import z from "zod";
+import { kebabize } from "./utils";
 
 export type TrpcClientWithQuery<R extends Router<any>> = {
   [K in keyof R]: R[K] extends Endpoint<infer Output, infer Input, any>
-    ? EndpointClient<Input, Output> & {
-        useQuery: Input extends import("zod").Schema
-          ? (
-              queryOptions: Omit<
-                Parameters<typeof useQueryType>[0],
-                "queryKey" | "queryFn"
-              > & {
-                input: z.infer<Input>;
-              }
-            ) => ReturnType<
-              typeof useQueryType<
-                Awaited<Output>,
-                Error,
-                Awaited<Output>,
-                string[]
-              >
-            >
-          : (
-              queryOptions?: Omit<
-                Parameters<typeof useQueryType>[0],
-                "queryKey" | "queryFn"
-              >
-            ) => ReturnType<
-              typeof useQueryType<
-                Awaited<Output>,
-                Error,
-                Awaited<Output>,
-                string[]
-              >
-            >;
+  ? EndpointClient<Input, Output> & {
+    useQuery: Input extends import("zod").Schema
+    ? (
+      queryOptions: Omit<
+        Parameters<typeof useQueryType>[0],
+        "queryKey" | "queryFn"
+      > & {
+        input: z.infer<Input>;
       }
-    : never;
+    ) => ReturnType<
+      typeof useQueryType<
+        Awaited<Output>,
+        Error,
+        Awaited<Output>,
+        string[]
+      >
+    >
+    : (
+      queryOptions?: Omit<
+        Parameters<typeof useQueryType>[0],
+        "queryKey" | "queryFn"
+      >
+    ) => ReturnType<
+      typeof useQueryType<
+        Awaited<Output>,
+        Error,
+        Awaited<Output>,
+        string[]
+      >
+    >;
+  }
+  : never;
 };
 
 export const createTrpcQueryClient = <
@@ -66,7 +67,7 @@ export const createTrpcQueryClient = <
               input?: any;
             }
           ) => {
-            const endpointName = prop.replace(/([A-Z])/g, "-$1").toLowerCase();
+            const endpointName = kebabize(prop);
             return opts.useQuery({
               ...queryOptions,
               queryKey: [endpointName],
@@ -79,6 +80,7 @@ export const createTrpcQueryClient = <
               },
             });
           },
+          key: kebabize(prop)
         };
       }
       return undefined;
