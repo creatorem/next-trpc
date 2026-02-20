@@ -92,6 +92,7 @@ export const createTrpcAPI = <Ctx>({
 
       return NextResponse.json({ data: result }, { status: 200 });
     } catch (error) {
+      console.error( error )
       if (error instanceof Error && "issues" in error) {
         // Zod validation error
         return NextResponse.json(

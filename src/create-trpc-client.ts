@@ -11,7 +11,7 @@ export type EndpointClient<Input, Output> = Input extends undefined
     key: string
   };
 
-type TrpcClient<R extends Router<any>> = {
+export type TrpcClient<R extends Router<any>> = {
   [K in keyof R]: R[K] extends Endpoint<infer Output, infer Input, any>
   ? EndpointClient<Input, Output>
   : never;
@@ -61,6 +61,7 @@ export const getTrpcFetch =
 
       if (!response.ok) {
         const errorData = await response.json();
+        console.error( errorData )
         throw new Error(errorData.error || "Request failed");
       }
 
